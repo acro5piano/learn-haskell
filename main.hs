@@ -10,7 +10,7 @@ dispatch text (x:xs) = dispatch (sub text (fst x) (snd x)) xs
 
 parse :: String -> String
 parse text = dispatch text exps
-    where exps = [("- (.+)", "<li>\\1</li>"), ("# (.+)", "<h1>\\1</h1>")]
+    where exps = [("^- (.+)$", "<li>\\1</li>"), ("^# (.+)$", "<h1>\\1</h1>")]
 
 main :: IO ()
 main = do text <- readFile "./assets/test.md"
