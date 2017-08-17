@@ -1,35 +1,18 @@
-import Debug.Trace
+import Text.Regex
+import Codec.Binary.UTF8.String
 
-bswap [x] = [x]
-bswap (x:xs)
-    | x > y = y:x:ys
-    | otherwise = x:y:ys
-    where
-        (y:ys) = bswap xs
+sub :: String -> String -> String -> String
+sub subject re replace = decodeString $ subRegex (mkRegex re) (encodeString subject) replace
 
-bsort [] = []
-bsort xs = y : bsort ys
-    where
-        (y:ys) = bswap xs
+dispatch :: String -> [(String, String)] -> String
+dispatch text [] = text
+dispatch text (x:xs) = dispatch (sub text (fst x) (snd x)) xs
 
-main = do
-    print $ bswap [5, 3, 1, 7, 2, 6]
-    print $ bsort [5, 3, 1, 7, 2, 6]
+parse :: String -> String
+parse text = dispatch text exps
+    where exps = [("- (.+)", "<li>\\1</li>"), ("# (.+)", "<h1>\\1</h1>")]
 
-    -- first
-    -- [5, 3, 1, 7, 2, 6] 5 3
-    -- [3, 5, 1, 7, 2, 6] 5 1
-    -- [3, 1, 5, 7, 2, 6]
-    -- [3, 1, 5, 2, 7, 6] 7 2
-    -- [3, 1, 5, 2, 6, 7] 7 6
+main :: IO ()
+main = do text <- readFile "./assets/test.md"
+          mapM_ putStrLn (map parse (lines text))
 
-    -- second
-    -- [1, 3, 5, 2, 6, 7] 3 1
-    -- [1, 3, 5, 2, 6, 7]
-    -- [1, 3, 2, 5, 6, 7] 5 2
-    -- [1, 3, 2, 5, 6, 7]
-
-    -- third
-    -- [1, 3, 2, 5, 6, 7]
-    -- [1, 2, 3, 5, 6, 7] 3 2
-    -- [1, 2, 3, 5, 6, 7]
